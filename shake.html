@@ -36,7 +36,7 @@
     }
 
     .img {
-      background-image: url(./images/row6col8-2.jpg);
+      background-image: url(./images/row6col8-4.jpg);
       background-size: 100% 100%;
       opacity: 1;
     }
@@ -52,11 +52,14 @@
     </div>
   </div>
   <select name="" id="js-select" onchange="changeImage(this.value)">
+    <option value="./images/row6col8-4.jpg">row6col8-4.jpg</option>
     <option value="./images/row6col8-2.jpg">row6col8-2.jpg</option>
+    <option value="./images/row6col8-3.jpg">row6col8-3.jpg</option>
     <option value="./images/row6col8.jpg">row6col8.jpg</option>
     <option value="./images/row8col10.jpg">row8col10.jpg</option>
     <option value="./images/row9col5-1.jpg">row9col5-1.jpg</option>
     <option value="./images/row9col5-2.jpg">row9col5-2.jpg</option>
+    <option value="./images/row9col5-3.jpg">row9col5-3.jpg</option>
     <option value="./images/row9col12.jpg">row9col12.jpg</option>
   </select>
 
@@ -149,9 +152,12 @@
       const object = {
         './images/row6col8.jpg': { row: 6, col: 8 },
         './images/row6col8-2.jpg': { row: 6, col: 8 },
+        './images/row6col8-3.jpg': { row: 6, col: 8 },
+        './images/row6col8-4.jpg': { row: 6, col: 8 },
         './images/row8col10.jpg': { row: 8, col: 10 },
         './images/row9col5-1.jpg': { row: 9, col: 5 },
         './images/row9col5-2.jpg': { row: 9, col: 5 },
+        './images/row9col5-3.jpg': { row: 9, col: 5 },
         './images/row9col12.jpg': { row: 9, col: 12 },
       }
       row = object[value].row
