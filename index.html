@@ -111,7 +111,7 @@
       <div class="config-item">
         <div class="config-item-title">图片地址：</div>
         <input type="text" class="config-item-input" id="js-image-url"
-          value="/images/row8col10.jpg">
+          value="./images/row8col10.jpg">
       </div>
       <div class="config-item">
         <div class="config-item-title">行数：</div>
@@ -129,12 +129,12 @@
         <button class="config-item-button" onclick="start()">渲染</button>
       </div>
       <div class="tips">
-        <div>/images/row6col8.jpg</div>
-        <div>/images/row6col8-2.jpg</div>
-        <div>/images/row8col10.jpg</div>
-        <div>/images/row9col5-1.jpg</div>
-        <div>/images/row9col5-2.jpg</div>
-        <div>/images/row9col12.jpg</div>
+        <div>./images/row6col8.jpg</div>
+        <div>./images/row6col8-2.jpg</div>
+        <div>./images/row8col10.jpg</div>
+        <div>./images/row9col5-1.jpg</div>
+        <div>./images/row9col5-2.jpg</div>
+        <div>./images/row9col12.jpg</div>
       </div>
     </div>
   </div>
@@ -146,7 +146,7 @@
     const canvas = document.getElementById('js-canvas')
     const ctx = canvas.getContext('2d')
 
-    let imageUrl = '/images/row8col10.jpg'
+    let imageUrl = './images/row8col10.jpg'
     let row = 8 // 行数
     let col = 10 // 列数
     let skipImages = 0; // 需要跳过的图像数量
