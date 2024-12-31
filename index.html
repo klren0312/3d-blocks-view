@@ -86,6 +86,12 @@
     .tips {
       color: #fff;
     }
+    .input {
+      width: 90%;
+      height: 30px;
+      background: #000;
+      color: #fff;
+    }
   </style>
 </head>
 
@@ -110,20 +116,19 @@
     <div class="config-block">
       <div class="config-item">
         <div class="config-item-title">图片地址：</div>
-        <input type="text" class="config-item-input" id="js-image-url"
-          value="./images/row8col10.jpg">
+        <select class="input" name="" id="js-select" onchange="changeImage(this.value)"></select>
       </div>
       <div class="config-item">
         <div class="config-item-title">行数：</div>
-        <input type="text" class="config-item-input" id="js-row" value="8">
+        <input type="text" class="config-item-input input" id="js-row" value="8">
       </div>
       <div class="config-item">
         <div class="config-item-title">列数：</div>
-        <input type="text" class="config-item-input" id="js-col" value="10">
+        <input type="text" class="config-item-input input" id="js-col" value="10">
       </div>
       <div class="config-item">
         <div class="config-item-title">跳过图片数：</div>
-        <input type="text" class="config-item-input" id="js-skip-images" value="0">
+        <input type="text" class="config-item-input input" id="js-skip-images" value="0">
       </div>
       <div class="config-item">
         <button class="config-item-button" onclick="start()">渲染</button>
@@ -146,188 +151,215 @@
     const canvas = document.getElementById('js-canvas')
     const ctx = canvas.getContext('2d')
 
-    let imageUrl = './images/row8col10.jpg'
-    let row = 8 // 行数
-    let col = 10 // 列数
-    let skipImages = 0; // 需要跳过的图像数量
+    // 下拉渲染
+    const selectObject = {
+      './images/row6col8.jpg': { row: 6, col: 8, skip: 0, name: '木头人' },
+      './images/row6col8-2.jpg': { row: 6, col: 8, skip: 0, name: '雪地鸟' },
+      './images/row6col8-3.jpg': { row: 6, col: 8, skip: 0, name: '人' },
+      './images/row6col8-4.jpg': { row: 6, col: 8, skip: 0, name: '街头霸王' },
+      './images/row8col10.jpg': { row: 8, col: 10, skip: 0, name: '圣诞雪球' },
+      './images/row9col5-1.jpg': { row: 9, col: 5, skip: 0, name: '飞行老鼠' },
+      './images/row9col5-2.jpg': { row: 9, col: 5, skip: 0, name: '易拉罐' },
+      './images/row9col5-3.jpg': { row: 9, col: 5, skip: 0, name: '兔子' },
+      './images/row9col12.jpg': { row: 9, col: 12, skip: 0, name: '彩色金属' },
+    }
+    const selectElement = document.getElementById('js-select')
+    for (const [key, value] of Object.entries(selectObject)) {
+      const option = document.createElement('option')
+      option.value = key
+      option.textContent = value.name
+      selectElement.appendChild(option)
+    }
+
+    let row = selectObject[Object.keys(selectObject)[0]].row // 行数
+    let col = selectObject[Object.keys(selectObject)[0]].col // 列数
+    let skipImages = selectObject[Object.keys(selectObject)[0]].skip // 需要跳过的图像数量
     let totalViews = row * col - skipImages // 总视图数
     let singleWidth = canvas.width / col // 单个视图的宽度
     let singleHeight = canvas.height / row // 单个视图的高度
-    let initialIndex = Math.floor(totalViews / 2); // 计算中间索引
-    let { rowNum: initialRow, colNum: initialCol } = getCoordinates(row, col, initialIndex);
+    let initialIndex = Math.floor(totalViews / 2) // 计算中间索引
+    let { rowNum: initialRow, colNum: initialCol } = getCoordinates(row, col, initialIndex)
 
-    let currentX = 0; // 当前位置
-    let targetX = 0; // 目标位置
-    let velocity = 0; // 速度
-    let friction = 0.85; // 摩擦系数
+    let currentX = 0 // 当前位置
+    let targetX = 0 // 目标位置
+    let velocity = 0 // 速度
+    let friction = 0.85 // 摩擦系数
 
-    let lastMouseX = 0; // 上一次鼠标位置
-    let lastTime = 0; // 上一次时间
-    let mouseSpeed = 0; // 鼠标速度
-    const maxSpeed = 40; // 增大最大速度限制
-
-    let isMouseOut = true; // 鼠标是否移出
-    let lastVelocity = 0; // 添加变量记录最后的速度
-
-    let isInitialSetupDone = false; // 初始设置是否完成
-
-    let animationFrameId; // requestAnimationFrame 的 ID
+    let lastMouseX = 0 // 上一次鼠标位置
+    let lastTime = 0 // 上一次时间
+    let mouseSpeed = 0 // 鼠标速度
+    const maxSpeed = 40 // 增大最大速度限制
+    let lastVelocity = 0 // 添加变量记录最后的速度
+    let animationFrameId // requestAnimationFrame 的 ID
 
     // 设置显示的图片
     img.style.width = `calc(100% * ${col})`
     img.style.height = `calc(100% * ${row})`
-    img.style.backgroundImage = `url(${imageUrl})`
+    img.style.backgroundImage = `url(${Object.keys(selectObject)[0]})`
     // 设置多视图的图片
-    multiViews.style.backgroundImage = `url(${imageUrl})`
+    multiViews.style.backgroundImage = `url(${Object.keys(selectObject)[0]})`
 
     /**
      * 初始化时设置中间图片和角度为0
      */
     const initialSetup = () => {
-      img.style.transform = `translate(calc(-100% / ${col} * ${initialCol}),calc(-100% / ${row} * ${initialRow}))`;
-      block.style.transform = 'perspective(2400px) rotateY(0deg)';
-    };
+      img.style.transform = `translate(calc(-100% / ${col} * ${initialCol}),calc(-100% / ${row} * ${initialRow}))`
+      block.style.transform = 'perspective(2400px) rotateY(0deg)'
+    }
 
     /**
      * 开始渲染
      */
     const start = () => {
-      imageUrl = document.getElementById('js-image-url').value;
-      row = parseInt(document.getElementById('js-row').value, 10);
-      col = parseInt(document.getElementById('js-col').value, 10);
-      skipImages = parseInt(document.getElementById('js-skip-images').value, 10);
-      totalViews = row * col - skipImages; // 总视图数
-      singleWidth = canvas.width / col; // 单个视图的宽度
-      singleHeight = canvas.height / row; // 单个视图的高度
+      imageUrl = document.getElementById('js-image-url').value
+      row = parseInt(document.getElementById('js-row').value, 10)
+      col = parseInt(document.getElementById('js-col').value, 10)
+      skipImages = parseInt(document.getElementById('js-skip-images').value, 10)
+      totalViews = row * col - skipImages // 总视图数
+      singleWidth = canvas.width / col // 单个视图的宽度
+      singleHeight = canvas.height / row // 单个视图的高度
 
-      console.log(imageUrl, row, col, skipImages, totalViews);
+      console.log(imageUrl, row, col, skipImages, totalViews)
       // 设置显示的图片
-      img.style.width = `calc(100% * ${col})`;
-      img.style.height = `calc(100% * ${row})`;
-      img.style.backgroundImage = `url(${imageUrl})`;
+      img.style.width = `calc(100% * ${col})`
+      img.style.height = `calc(100% * ${row})`
+      img.style.backgroundImage = `url(${imageUrl})`
       // 设置多视图的图片
-      multiViews.style.backgroundImage = `url(${imageUrl})`;
+      multiViews.style.backgroundImage = `url(${imageUrl})`
 
       // 重置动画状态
-      currentX = 0;
-      targetX = 0;
-      velocity = 0;
-      lastMouseX = 0;
-      lastTime = 0;
-      mouseSpeed = 0;
-      isMouseOut = true;
-      lastVelocity = 0;
+      currentX = 0
+      targetX = 0
+      velocity = 0
+      lastMouseX = 0
+      lastTime = 0
+      mouseSpeed = 0
+
+      lastVelocity = 0
       if (animationFrameId) {
-        cancelAnimationFrame(animationFrameId);
-        animationFrameId = null;
+        cancelAnimationFrame(animationFrameId)
+        animationFrameId = null
       }
 
-      initialSetup();
-      animate(); // 重新启动动画
+      initialSetup()
+      animate() // 重新启动动画
     }
 
-    /**
-     * 鼠标进入
-     */
-    block.addEventListener('mouseenter', function () {
-      isMouseOut = false;
-    });
+    function changeImage(value) {
+
+      row = selectObject[value].row
+      col = selectObject[value].col
+      skipImages = selectObject[value].skip
+      totalViews = row * col - skipImages
+      initialIndex = Math.floor(totalViews / 2)
+      let { rowNum: initialRow, colNum: initialCol } = getCoordinates(row, col, initialIndex)
+
+      img.style.backgroundImage = `url(${value})`
+      img.style.width = `calc(100% * ${col})`
+      img.style.height = `calc(100% * ${row})`
+      img.style.transform = `translate(calc(-100% / ${col} * ${initialCol}),calc(-100% / ${row} * ${initialRow}))`
+
+      // 设置多视图的图片
+      multiViews.style.backgroundImage = `url(${value})`
+
+      // 重置动画状态
+      currentX = 0
+      targetX = 0
+      velocity = 0
+      lastMouseX = 0
+      lastTime = 0
+      mouseSpeed = 0
+      lastVelocity = 0
+      if (animationFrameId) {
+        cancelAnimationFrame(animationFrameId)
+        animationFrameId = null
+      }
+
+      initialSetup()
+      animate() // 重新启动动画
+    }
 
     /**
      * 鼠标移动
      */
     block.addEventListener('mousemove', function (e) {
-      isMouseOut = false;
-      const rect = block.getBoundingClientRect();
-      const currentMouseX = e.clientX - rect.left;
-      const currentTime = Date.now();
+      const rect = block.getBoundingClientRect()
+      const currentMouseX = e.clientX - rect.left
+      const currentTime = Date.now()
 
+      // 计算鼠标速度
       if (lastTime !== 0) {
-        const deltaX = currentMouseX - lastMouseX;
-        const deltaTime = Math.max(currentTime - lastTime, 16); // 确保最小时间间隔
-        mouseSpeed = deltaX / deltaTime * 20; // 增加速度系数
-        lastVelocity = deltaX; // 记录实际位移作为速度
+        const deltaX = currentMouseX - lastMouseX
+        const deltaTime = currentTime - lastTime
+        mouseSpeed = deltaX / deltaTime // 速度 = 距离 / 时间
+
+        // 限制最大速度
+        if (mouseSpeed > maxSpeed) {
+          mouseSpeed = maxSpeed
+        } else if (mouseSpeed < -maxSpeed) {
+          mouseSpeed = -maxSpeed
+        }
       }
 
-      lastMouseX = currentMouseX;
-      lastTime = currentTime;
-      targetX = currentMouseX;
-
-      // 如果动画未启动，则启动动画
-      if (!animationFrameId) {
-        animationFrameId = requestAnimationFrame(animate);
-      }
-    });
+      lastMouseX = currentMouseX
+      lastTime = currentTime
+      targetX = currentMouseX
+    })
 
     /**
      * 鼠标离开
      */
     block.addEventListener('mouseleave', function () {
-      isMouseOut = true;
       // 使用最后的实际位移作为初始惯性速度
-      velocity = lastVelocity * 0.8;
-    });
+      velocity = lastVelocity * 0.8
+    })
 
 
     // 调用初始设置函数
-    initialSetup();
+    initialSetup()
 
     /**
      * 动画, 每帧执行
      */
     function animate() {
-      if (isMouseOut && Math.abs(velocity) < 0.1) {
-        // 如果鼠标移出并且速度非常小，则停止动画
-        cancelAnimationFrame(animationFrameId);
-        animationFrameId = null;
-        return;
-      }
-
-      if (isMouseOut) {
-        // 惯性移动
-        currentX += velocity;
-        velocity *= 0.95; // 逐渐减速
-      } else {
-        // 正常移动
-        const dx = targetX - currentX;
-        velocity = dx * 0.095; // 简化速度计算
-        currentX += velocity;
-      }
+      // 使用缓动函数平滑速度变化
+      velocity += (targetX - currentX) * 0.05 * Math.abs(mouseSpeed)
+      velocity *= friction
+      currentX += velocity
 
       // 计算当前索引
-      const blockWidth = block.offsetWidth;
-      const unitWidth = Math.round(blockWidth / totalViews);
-      let theIndex = Math.round(currentX / unitWidth);
+      const blockWidth = block.offsetWidth
+      const unitWidth = Math.round(blockWidth / totalViews)
+      let theIndex = Math.round(currentX / unitWidth)
 
       // 确保索引在有效范围内
       if (theIndex < 0) {
-        theIndex = 0;
-        velocity = 0; // 到达边界时停止移动
+        theIndex = 0
       } else if (theIndex > totalViews - 1) {
-        theIndex = totalViews - 1;
-        velocity = 0; // 到达边界时停止移动
+        theIndex = totalViews - 1
       }
 
-      const { rowNum, colNum } = getCoordinates(row, col, theIndex);
+      const { rowNum, colNum } = getCoordinates(row, col, theIndex)
 
       // 设置旋转角度和视点图
-      const container = document.getElementById('js-container');
-      const rotateY = (currentX - blockWidth / 2) / blockWidth * 30;
-      block.style.transform = `perspective(${container.offsetHeight ? container.offsetHeight * 2 : 2400}px) rotateY(${rotateY}deg)`;
-      img.style.transform = `translate(calc(-100% / ${col} * ${colNum}),calc(-100% / ${row} * ${rowNum}))`;
+      const container = document.getElementById('js-container')
+      const rotateY = (currentX - blockWidth / 2) / blockWidth * 30
+      block.style.transform = `perspective(${container.offsetHeight ? container.offsetHeight * 2 : 2400}px) rotateY(${rotateY}deg)`
+      img.style.transform = `translate(calc(-100% / ${col} * ${colNum}),calc(-100% / ${row} * ${rowNum}))`
 
-      ctx.clearRect(0, 0, 300, 300);
-      ctx.beginPath();
-      ctx.lineWidth = 2;
-      ctx.strokeStyle = 'white';
-      ctx.rect(colNum * singleWidth, rowNum * singleHeight, singleWidth, singleHeight);
-      ctx.stroke();
+      // 绘制宫格图选框
+      ctx.clearRect(0, 0, 300, 300)
+      ctx.beginPath()
+      ctx.lineWidth = 2
+      ctx.strokeStyle = 'white'
+      ctx.rect(colNum * singleWidth, rowNum * singleHeight, singleWidth, singleHeight)
+      ctx.stroke()
 
       // 继续动画
-      animationFrameId = requestAnimationFrame(animate);
+      animationFrameId = requestAnimationFrame(animate)
     }
 
-    animate();
+    animate()
 
     /**
      * 获取坐标
@@ -337,10 +369,10 @@
      * @returns 
      */
     function getCoordinates(rows, cols, index) {
-      const adjustedIndex = index + skipImages; // 调整索引以跳过前几张图
-      const row = Math.floor(adjustedIndex / cols);
-      const col = cols - 1 - (adjustedIndex % cols);
-      return { rowNum: row, colNum: col };
+      const adjustedIndex = index + skipImages // 调整索引以跳过前几张图
+      const row = Math.floor(adjustedIndex / cols)
+      const col = cols - 1 - (adjustedIndex % cols)
+      return { rowNum: row, colNum: col }
     }
 
   </script>
