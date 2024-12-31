@@ -251,7 +251,9 @@
       col = selectObject[value].col
       skipImages = selectObject[value].skip
       totalViews = row * col - skipImages
-      initialIndex = Math.floor(totalViews / 2)
+      singleWidth = canvas.width / col // 单个视图的宽度
+      singleHeight = canvas.height / row // 单个视图的高度
+      initialIndex = Math.floor(totalViews / 2) // 计算中间索引
       let { rowNum: initialRow, colNum: initialCol } = getCoordinates(row, col, initialIndex)
 
       img.style.backgroundImage = `url(${value})`
