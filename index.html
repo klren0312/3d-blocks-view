@@ -199,13 +199,7 @@
     // 设置多视图的图片
     multiViews.style.backgroundImage = `url(${Object.keys(selectObject)[0]})`
 
-    /**
-     * 初始化时设置中间图片和角度为0
-     */
-    const initialSetup = () => {
-      img.style.transform = `translate(calc(-100% / ${col} * ${initialCol}),calc(-100% / ${row} * ${initialRow}))`
-      block.style.transform = 'perspective(2400px) rotateY(0deg)'
-    }
+
 
     /**
      * 开始渲染
@@ -308,17 +302,19 @@
       targetX = currentMouseX
     })
 
-    /**
-     * 鼠标离开
-     */
-    block.addEventListener('mouseleave', function () {
-      // 使用最后的实际位移作为初始惯性速度
-      velocity = lastVelocity * 0.8
-    })
-
-
     // 调用初始设置函数
     initialSetup()
+
+    // 启动动画
+    animate()
+
+    /**
+     * 初始化时设置中间图片和角度为0
+     */
+    function initialSetup() {
+      img.style.transform = `translate(calc(-100% / ${col} * ${initialCol}),calc(-100% / ${row} * ${initialRow}))`
+      block.style.transform = 'perspective(2400px) rotateY(0deg)'
+    }
 
     /**
      * 动画, 每帧执行
@@ -360,8 +356,6 @@
       // 继续动画
       animationFrameId = requestAnimationFrame(animate)
     }
-
-    animate()
 
     /**
      * 获取坐标
